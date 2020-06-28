@@ -4,4 +4,4 @@ all: run
 run:
 	rm -rf pebble
 	go build ./pebble.go
-	./pebble schema
+	./pebble schema status
