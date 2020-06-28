@@ -2,6 +2,6 @@ connection:
   host: localhost
   port: 3306
   name: test
-  user: root
+  user: user
   password: password
   driver: mysql
