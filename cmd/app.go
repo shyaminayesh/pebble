@@ -20,7 +20,10 @@ func Dispatch() {
 		Cobra instance
 	*/
 	Command.AddCommand(Version_Command)
+
 	Command.AddCommand(Schema_Command)
+	Schema_Command.AddCommand(Schema_Sub_Command)
+
 
 	if err := Command.Execute(); err != nil {
 		fmt.Println(err)
