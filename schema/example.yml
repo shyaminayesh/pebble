@@ -1,0 +1,29 @@
+table:
+  engine: InnoDB
+  charset: utf8mb4
+  collation: utf8mb4_general_ci
+
+
+columns:
+  - name: id
+    type: bigint(20)
+    primary: true
+    nullable: false
+    increment: true
+
+  - name: email
+    type: varchar(100)
+    nullable: false
+    collation: utf8mb4_unicode_ci
+
+  - name: password
+    type: varchar(72)
+    nullable: false
+
+  - name: created_at
+    type: bigint(20)
+    nullable: true
+
+  - name: updated_at
+    type: bigint(20)
+    nullable: true
