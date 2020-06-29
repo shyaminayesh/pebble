@@ -190,15 +190,6 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 
 		}
 
-		// for rows.Next() {
-		// 	var name string
-		// 	err := rows.Scan(&name)
-		// 	if err != nil { log.Fatal(err) }
-		// 	fmt.Println("[DROP]: " + name)
-		// 	// db.Exec("DROP TABLE " + table)
-		// }
-
 	}
-	// "SHOW FULL COLUMNS FROM users WHERE Field NOT IN ('id')"
 
 }
