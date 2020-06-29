@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"pebble/config"
 	"github.com/spf13/cobra"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
