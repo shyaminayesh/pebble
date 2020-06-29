@@ -13,12 +13,12 @@ import (
 var Schema_Status_Command = &cobra.Command{
 	Use: "status",
 	Short: "View schema status",
-	Run: run,
+	Run: schema_status,
 }
 
 var conf = config.Config()
 
-func run(cmd *cobra.Command, args []string) {
+func schema_status(cmd *cobra.Command, args []string) {
 
 	type (
 		Schema struct {
