@@ -175,7 +175,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			for _, column := range structure.Columns {
 				columns = append(columns, column.Name)
 			}
-			query := fmt.Sprintf("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME NOT IN ('%s');", schema, conf_connection.Get("name"), strings.Join(columns, "','"))
+			query := fmt.Sprintf("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME NOT IN ('%s')", schema, conf_connection.Get("name"), strings.Join(columns, "','"))
 			rows, err := db.Query(query)
 			if err != nil { log.Fatal(err) }
 			defer rows.Close()
