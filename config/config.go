@@ -9,7 +9,7 @@ func Config() *viper.Viper {
 
 	var v = viper.New()
 	v.SetConfigName("pebble")
-	v.SetConfigType("yaml")
+	v.SetConfigType("yml")
 	v.AddConfigPath(".")
 	err := v.ReadInConfig()
 	if err != nil {
