@@ -16,8 +16,6 @@ var Schema_Status_Command = &cobra.Command{
 	Run: schema_status,
 }
 
-var conf = config.Config()
-
 func schema_status(cmd *cobra.Command, args []string) {
 
 	type (
@@ -38,10 +36,11 @@ func schema_status(cmd *cobra.Command, args []string) {
 		We have to initialize viper configuration
 		for future usage in the below sections.
 	*/
-	config_connection := conf.Sub("connection")
+	var conf = config.Config()
+	conf_connection := conf.Sub("connection")
 
-	conuri := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s", config_connection.Get("user"), config_connection.Get("password"), config_connection.Get("host"), config_connection.Get("port"), config_connection.Get("name"))
-	db, err := sql.Open(config_connection.Get("driver").(string), conuri)
+	dialect := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s", conf_connection.Get("user"), conf_connection.Get("password"), conf_connection.Get("host"), conf_connection.Get("port"), conf_connection.Get("name"))
+	db, err := sql.Open(conf_connection.Get("driver").(string), dialect)
 	if err != nil {
 		log.Fatal(err)
 	}
