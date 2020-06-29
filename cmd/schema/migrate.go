@@ -188,6 +188,41 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 				db.Exec(query)
 			}
 
+
+			/*
+				It's time to check each colum for changes and apply them
+				to the live database
+			*/
+			for _, column := range structure.Columns {
+
+				type (
+					Column struct {
+						Name		string
+						Type		string
+						Nullable	string
+						Key			string
+						Charset		sql.NullString
+						Collation	sql.NullString
+						Extra		string
+					}
+				)
+
+				Result := Column {}
+				query := fmt.Sprintf("SELECT `COLUMN_NAME`, `COLUMN_TYPE`, `IS_NULLABLE`, `COLUMN_KEY`, `CHARACTER_SET_NAME`, `COLLATION_NAME`, `EXTRA` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME='%s'", schema, conf_connection.Get("name"), column.Name)
+				db.QueryRow(query).Scan(&Result.Name, &Result.Type, &Result.Nullable, &Result.Key, &Result.Charset, &Result.Collation, &Result.Extra)
+				// fmt.Println( query )
+				// fmt.Println( Result.Charset.Valid )
+
+				// VALIDATE ( Type )
+				if column.Type != Result.Type { db.Exec(fmt.Sprintf("ALTER TABLE `%s`.`%s` MODIFY COLUMN `%s` %s", conf_connection.Get("name"), schema, column.Name, column.Type)) }
+
+				// VALIDATE ( Nullable )
+				// fmt.Print(column.Nullable)
+				// fmt.Print(" : ")
+				// fmt.Println(Result.Nullable)
+
+			}
+
 		}
 
 	}
