@@ -5,3 +5,6 @@ connection:
   user: user
   password: password
   driver: mysql
+
+schema:
+  dir: schema
