@@ -165,18 +165,30 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			Here we need to handle table exisits and schema need to
 			be validated state.
 		*/
-		// if count >= 1 {
-		// 	fmt.Println( schema )
-		// }
+		if count >= 1 {
 
-		/*
-			First of all we have to delete all the columns that
-			not presented in the schema files.
-		*/
-		// query := fmt.Sprintf("SHOW FULL COLUMNS FROM %s WHERE Field NOT IN ('%s')", schema, strings.Join(columns, "','"))
-		// rows, err := db.Query(query)
-		// if err != nil { log.Fatal(err) }
-		// defer rows.Close()
+			/*
+				We can delete the columns that are not present in the
+				schema file safely before processing any other action.
+			*/
+			var columns []string
+			for _, column := range structure.Columns {
+				columns = append(columns, column.Name)
+			}
+			query := fmt.Sprintf("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME NOT IN ('%s');", schema, conf_connection.Get("name"), strings.Join(columns, "','"))
+			rows, err := db.Query(query)
+			if err != nil { log.Fatal(err) }
+			defer rows.Close()
+
+			for rows.Next() {
+				var name string
+				err := rows.Scan(&name)
+				if err != nil { log.Fatal(err) }
+				query := fmt.Sprintf("ALTER TABLE %s DROP COLUMN %s", schema, name)
+				db.Exec(query)
+			}
+
+		}
 
 		// for rows.Next() {
 		// 	var name string
@@ -185,8 +197,6 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		// 	fmt.Println("[DROP]: " + name)
 		// 	// db.Exec("DROP TABLE " + table)
 		// }
-
-		// ALTER TABLE Customers DROP COLUMN ContactName;
 
 	}
 	// "SHOW FULL COLUMNS FROM users WHERE Field NOT IN ('id')"
