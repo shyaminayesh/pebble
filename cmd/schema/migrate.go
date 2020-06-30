@@ -156,7 +156,6 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 
 			}
 			query := fmt.Sprintf("CREATE TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s", schema, columns_stmnt, structure.Table.Engine, structure.Table.Charset, structure.Table.Collation)
-			fmt.Println( query )
 			db.Exec(query)
 
 		}
