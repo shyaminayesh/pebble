@@ -7,4 +7,7 @@ connection:
   driver: mysql
 
 schema:
-  dir: schema
+  dir: database/schema
+
+seed:
+  dir: database/seed
