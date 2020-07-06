@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,12 @@ var Schema_Command = &cobra.Command{
 }
 
 func run(cmd *cobra.Command, args []string) {
-	// for _, arg := range args {
-	// 	fmt.Println( arg )
-	// }
+
+	fmt.Println("Usage: pebble schema [OPTION]")
+	fmt.Println()
+	fmt.Println("   migrate")
+	fmt.Println("       This command will migrate all the")
+	fmt.Println("       tables defined in the schema directory")
+	fmt.Println()
+
 }
