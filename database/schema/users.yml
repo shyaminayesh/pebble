@@ -11,9 +11,17 @@ columns:
     nullable: false
     increment: true
 
+  - name: name_first
+    type: varchar(50)
+    nullable: false
+
+  - name: name_last
+    type: varchar(50)
+    nullable: false
+
   - name: email
     type: varchar(100)
-    nullable: false
+    nullable: true
     collation: utf8mb4_unicode_ci
 
   - name: password
