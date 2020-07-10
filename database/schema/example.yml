@@ -27,3 +27,7 @@ columns:
   - name: updated_at
     type: bigint(20)
     nullable: true
+
+  - name: deleted_at
+    type: bigint(20)
+    nullable: true
