@@ -6,6 +6,7 @@ import (
 	"strings"
 	"io/ioutil"
 	"database/sql"
+	"pebble/utils/log"
 	"pebble/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -41,7 +42,8 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 
 	/*
 		We need to iterate through every file in the
-		migration directory to find
+		migration directory to find every migration answer
+		file to operate.
 	*/
 	var schemas []string
 	files, err := ioutil.ReadDir("./" + conf_schema.Get("dir").(string))
@@ -78,7 +80,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("[DROP]: " + table)
+		logger.Println("green", "[TABLE]: ", "DROPPING ( " + table + " )")
 		db.Exec("DROP TABLE " + table)
 	}
 
