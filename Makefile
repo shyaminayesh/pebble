@@ -12,4 +12,4 @@ uninstall:
 run:
 	rm -rf pebble
 	go build ./pebble.go
-	./pebble schema migrate
+	./pebble seed
