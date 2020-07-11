@@ -1,0 +1,5 @@
+fields:
+  - title: "Sample post title"
+    description: "Sample post description"
+    created_at: "1594494528"
+    updated_at: "1594494528"
