@@ -1,5 +1,7 @@
-- id: 
-  email:
-  password:
-  created_at:
-  updated_at: 
+fields:
+  - name_first: "John"
+    name_last: "Doe"
+    email: "john@doe.com"
+    password: "password"
+    created_at: "1594494528"
+    updated_at: "1594494528"
