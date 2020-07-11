@@ -21,7 +21,7 @@ columns:
 
   - name: email
     type: varchar(100)
-    nullable: true
+    nullable: false
     collation: utf8mb4_unicode_ci
 
   - name: password
