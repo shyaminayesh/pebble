@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"pebble/config"
 	"pebble/utils/log"
+	"github.com/spf13/viper"
 	"github.com/spf13/cobra"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -75,6 +76,51 @@ func seed(cmd *cobra.Command, args []string) {
 					seed data. At this point we can safely continue the process.
 				*/
 				logger.Println("green", "[TABLE]: ", "PROCESSING [" + file_name + "]")
+
+				/*
+					Get seed data from the configuration file and start
+					processing them to insert into database. We can utilize
+					viper with pre defined struct to read configuration
+					files into the application.
+				*/
+				type (
+					Structure struct {
+						Fields		[]map[string]interface {}
+					}
+				)
+
+				v := viper.New()
+				v.SetConfigName(file_name)
+				v.SetConfigType("yml")
+				v.AddConfigPath("./" + seed_configs.Get("dir").(string))
+				err := v.ReadInConfig()
+				if err != nil {
+					logger.Println("red", "[FATAL]: ", "FAILED TO LOAD CONFIGURATION [" + file_name + "]")
+				}
+				var structure Structure
+				v.Unmarshal(&structure)
+
+				/*
+					Check if we have manually entered fields set configured
+					and insert them to the table.
+				*/
+				for _, fields := range structure.Fields {
+
+					/*
+						We have each field information ready to inserted into
+						the database.Now we can add data using insert queries.
+					*/
+					var columns []string
+					var values []string
+					for column, value := range fields {
+						columns = append(columns, column)
+						values = append(values, value.(string))
+					}
+
+					query := fmt.Sprintf("INSERT INTO `%s` (`%s`) VALUES ('%s')", file_name, strings.Join(columns, "`, `"), strings.Join(values, "', '"))
+					db.Exec(query)
+
+				}
 
 			}
 
