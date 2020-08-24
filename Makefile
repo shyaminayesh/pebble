@@ -9,7 +9,9 @@ install:
 uninstall:
 	sudo rm -rf /usr/bin/pebble
 
-run:
+build:
 	rm -rf pebble
 	go build ./pebble.go
-	./pebble seed
+
+run:
+	go run ./pebble.go schema migrate
