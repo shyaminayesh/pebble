@@ -128,36 +128,37 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 
 
 		/*
-			Here we can handle table not exists state and we need to
-			create the table accoding to the schema file provided.
+			Here we handle the table not exists state by using the
+			table count from the last sql query and then we create new
+			table in the database according to the migration file.
 		*/
 		if count == 0 {
 
-			var columns_stmnt string
+			var sql_statement string
 			var columns_length = len(structure.Columns) - 1
 			for index, column := range structure.Columns {
 
 				// BASE STATEMENT
-				columns_stmnt = columns_stmnt + column.Name + " " + column.Type
+				sql_statement = sql_statement + column.Name + " " + column.Type
 
 				// COLLATION
-				if len(column.Collation) > 0 { columns_stmnt = columns_stmnt + " COLLATE " + column.Collation }
+				if len(column.Collation) > 0 { sql_statement = sql_statement + " COLLATE " + column.Collation }
 
 				// NULLABLE
-				if column.Nullable == true { columns_stmnt = columns_stmnt + " NULL" }
-				if column.Nullable == false { columns_stmnt = columns_stmnt + " NOT NULL" }
+				if column.Nullable == true { sql_statement = sql_statement + " NULL" }
+				if column.Nullable == false { sql_statement = sql_statement + " NOT NULL" }
 
 				// AUTO INCREMENT
 				if column.Primary == true {
-					if column.Increment == true { columns_stmnt = columns_stmnt + " PRIMARY KEY AUTO_INCREMENT" }
-					if column.Increment == false { columns_stmnt = columns_stmnt + " PRIMARY KEY" }
+					if column.Increment == true { sql_statement = sql_statement + " PRIMARY KEY AUTO_INCREMENT" }
+					if column.Increment == false { sql_statement = sql_statement + " PRIMARY KEY" }
 				}
 
 				// APPEND COMMA
-				if index != columns_length { columns_stmnt = columns_stmnt + "," }
+				if index != columns_length { sql_statement = sql_statement + "," }
 
 			}
-			query := fmt.Sprintf("CREATE TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s", schema, columns_stmnt, structure.Table.Engine, structure.Table.Charset, structure.Table.Collation)
+			query := fmt.Sprintf("CREATE TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s", schema, sql_statement, structure.Table.Engine, structure.Table.Charset, structure.Table.Collation)
 			db.Exec(query)
 
 		}
