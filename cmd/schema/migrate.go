@@ -164,8 +164,9 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		}
 
 		/*
-			Here we need to handle table exisits and schema need to
-			be validated state.
+			Depending on the recent sql query table count details we can
+			decide to modify exsisting table schema according to the
+			changes in the migration file.
 		*/
 		if count >= 1 {
 
