@@ -68,6 +68,40 @@ func (schema *Schema) File(path string) {
 
 
 func (schema *Schema) Statement() string {
-	return fmt.Sprintf("CREATE TABLE `%s` () ENGINE=%s DEFAULT CHARSET=%s DEFAULT COLLATE=%s", schema.Name, schema.Structure.Table.Engine, schema.Structure.Table.Charset, schema.Structure.Table.Collation)
+	return fmt.Sprintf("CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s DEFAULT COLLATE=%s", schema.Name, schema.GenerateColumnBaseStatement(), schema.Structure.Table.Engine, schema.Structure.Table.Charset, schema.Structure.Table.Collation)
 }
 
+
+
+/*
+Generate sql statment lines for each column we have
+in our migration answer file to append to the final
+statement.
+*/
+func (schema *Schema) GenerateColumnBaseStatement() string {
+
+	var statement string
+	for _, column := range schema.Structure.Columns {
+
+		// BASE
+		sql := fmt.Sprintf("`%s` %s", column.Name, column.Type)
+
+		// NULLABLE
+		if column.Nullable == true { sql = sql + " NULL" }
+		if column.Nullable == false { sql = sql + " NOT NULL" }
+
+		// AUTO INCREMENT
+		if column.Increment == true { sql = sql + " AUTO_INCREMENT" }
+
+		// APPEND
+		statement = statement + sql + ", "
+
+	}
+	return strings.TrimSuffix(statement, ", ")
+
+}
+
+
+func (schema *Schema) GenerateColumnKeyStatement() string {
+	return fmt.Sprintf("")
+}
