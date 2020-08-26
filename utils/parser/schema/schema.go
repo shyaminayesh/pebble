@@ -45,17 +45,17 @@ func (schema *Schema) File(path string) {
 	os.IsNotExist(err) { log.Fatal(err) }
 
 	/*
-		We have a working schema file and now we can
-		set known properties of the schema using the
-		migration file
+	We have a working schema file and now we can
+	set known properties of the schema using the
+	migration file
 	*/
 	schema.Path, _ = filepath.Abs(path)
 	schema.Name = strings.Replace(filepath.Base(schema.Path), ".yml", "", 1)
 
 	/*
-		We need to read the file and append the table
-		properties to the Schema struct to continue
-		the migration file parse.
+	We need to read the file and append the table
+	properties to the Schema struct to continue
+	the migration file parse.
 	*/
 	buffer, err := ioutil.ReadFile(schema.Path)
 	if err != nil { log.Fatal(err) }
