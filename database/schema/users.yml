@@ -20,9 +20,7 @@ columns:
 
   - name: email
     type: varchar(100)
-    unique: true
     nullable: false
-    collation: utf8mb4_unicode_ci
 
   - name: password
     type: varchar(72)
@@ -45,6 +43,5 @@ keys:
   - field: id
     type: PRIMARY
 
-
-indexes:
   - field: email
+    type: UNIQUE

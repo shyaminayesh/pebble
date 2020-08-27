@@ -34,7 +34,6 @@ type (
 		Name		string		`yaml:"name"`
 		Type		string		`yaml:"type"`
 		Primary		bool		`yaml:"primary"`
-		Unique		bool		`yaml:"unique"`
 		Nullable	bool		`yaml:"nullable"`
 		Increment	bool		`yaml:"increment"`
 	}
@@ -100,9 +99,6 @@ func (schema *Schema) ColumnStatement() string {
 		// NULLABLE
 		if column.Nullable == true { sql = sql + " NULL" }
 		if column.Nullable == false { sql = sql + " NOT NULL" }
-
-		// UNIQUE
-		if column.Unique == true { sql = sql + " UNIQUE" }
 
 		// AUTO INCREMENT
 		if column.Increment == true { sql = sql + " AUTO_INCREMENT" }
