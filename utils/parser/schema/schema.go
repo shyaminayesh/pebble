@@ -21,6 +21,7 @@ type (
 		Table		Table		`yaml:"table"`
 		Columns		[]Column	`yaml:"columns"`
 		Keys		[]Key		`yaml:"keys"`
+		Indexes		[]Index		`yaml:"indexes"`
 	}
 
 	Table struct {
@@ -43,6 +44,9 @@ type (
 		Type		string		`yaml:"type"`
 	}
 
+	Index struct {
+		Field		string		`yaml:"field"`
+	}
 )
 
 
@@ -118,6 +122,15 @@ func (schema *Schema) ColumnStatement() string {
 	}
 
 	/*
+	Append indexes if there is any present in the schema
+	migration file.
+	*/
+	is_indexes, indexes_stmnt := schema.IndexStatement()
+	if is_indexes {
+		statement = statement + indexes_stmnt
+	}
+
+	// RETURN
 	return strings.TrimSuffix(statement, ", ")
 
 }
@@ -146,5 +159,24 @@ func (schema *Schema) KeysStatement() (bool, string) {
 }
 
 
+
+func (schema *Schema) IndexStatement() (bool, string) {
+
+	/*
+	We have to check if there is indexes available for this
+	schema and build the query depending on the indexes.
+	*/
+	if len(schema.Structure.Indexes) > 0 {
+
+		var statement string
+		for _, column := range schema.Structure.Indexes {
+			sql := fmt.Sprintf("INDEX %s (%s)", column.Field, column.Field)
+			statement = statement + sql + ", "
+		}
+		return true, statement
+
+	} else {
+		return false, ""
+	}
 
 }
