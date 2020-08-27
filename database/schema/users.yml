@@ -45,3 +45,9 @@ keys:
 
   - field: email
     type: UNIQUE
+
+
+indexes:
+  - field: created_at
+  - field: updated_at
+  - field: deleted_at
