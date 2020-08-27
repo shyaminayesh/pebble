@@ -10,6 +10,7 @@ import (
 	"pebble/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	parser "pebble/utils/parser/schema"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -84,6 +85,9 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		db.Exec("DROP TABLE " + table)
 	}
 
+
+
+	// HERE ####
 	for _, schema := range schemas {
 		fmt.Println("[TABLE]: " + schema)
 
@@ -133,34 +137,9 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			table in the database according to the migration file.
 		*/
 		if count == 0 {
-
-			var sql_statement string
-			var columns_length = len(structure.Columns) - 1
-			for index, column := range structure.Columns {
-
-				// BASE STATEMENT
-				sql_statement = sql_statement + column.Name + " " + column.Type
-
-				// COLLATION
-				if len(column.Collation) > 0 { sql_statement = sql_statement + " COLLATE " + column.Collation }
-
-				// NULLABLE
-				if column.Nullable == true { sql_statement = sql_statement + " NULL" }
-				if column.Nullable == false { sql_statement = sql_statement + " NOT NULL" }
-
-				// AUTO INCREMENT
-				if column.Primary == true {
-					if column.Increment == true { sql_statement = sql_statement + " PRIMARY KEY AUTO_INCREMENT" }
-					if column.Increment == false { sql_statement = sql_statement + " PRIMARY KEY" }
-				}
-
-				// APPEND COMMA
-				if index != columns_length { sql_statement = sql_statement + "," }
-
-			}
-			query := fmt.Sprintf("CREATE TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s", schema, sql_statement, structure.Table.Engine, structure.Table.Charset, structure.Table.Collation)
-			db.Exec(query)
-
+			parser := parser.Schema {}
+			parser.File("./" + conf_schema.Get("dir").(string) + "/" + schema + ".yml")
+			db.Exec(parser.Statement())
 		}
 
 		/*
