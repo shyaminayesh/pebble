@@ -4,8 +4,8 @@ import (
 	"os"
 	"log"
 	"fmt"
-	"io/ioutil"
 	"strings"
+	"io/ioutil"
 	"path/filepath"
 	"gopkg.in/yaml.v3"
 )
@@ -125,7 +125,7 @@ func (schema *Schema) ColumnStatement() string {
 	Append indexes if there is any present in the schema
 	migration file.
 	*/
-	is_indexes, indexes_stmnt := schema.IndexStatement()
+	is_indexes, indexes_stmnt := schema.IndexesStatement()
 	if is_indexes {
 		statement = statement + indexes_stmnt
 	}
@@ -160,7 +160,7 @@ func (schema *Schema) KeysStatement() (bool, string) {
 
 
 
-func (schema *Schema) IndexStatement() (bool, string) {
+func (schema *Schema) IndexesStatement() (bool, string) {
 
 	/*
 	We have to check if there is indexes available for this
