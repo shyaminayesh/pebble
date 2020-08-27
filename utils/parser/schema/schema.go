@@ -20,6 +20,7 @@ type (
 	Structure struct {
 		Table		Table		`yaml:"table"`
 		Columns		[]Column	`yaml:"columns"`
+		Keys		[]Key		`yaml:"keys"`
 	}
 
 	Table struct {
@@ -36,6 +37,12 @@ type (
 		Nullable	bool		`yaml:"nullable"`
 		Increment	bool		`yaml:"increment"`
 	}
+
+	Key struct {
+		Field		string		`yaml:"field"`
+		Type		string		`yaml:"type"`
+	}
+
 )
 
 
@@ -68,7 +75,7 @@ func (schema *Schema) File(path string) {
 
 
 func (schema *Schema) Statement() string {
-	return fmt.Sprintf("CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s DEFAULT COLLATE=%s", schema.Name, schema.GenerateColumnBaseStatement(), schema.Structure.Table.Engine, schema.Structure.Table.Charset, schema.Structure.Table.Collation)
+	return fmt.Sprintf("CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s DEFAULT COLLATE=%s", schema.Name, schema.ColumnStatement(), schema.Structure.Table.Engine, schema.Structure.Table.Charset, schema.Structure.Table.Collation)
 }
 
 
@@ -78,7 +85,7 @@ Generate sql statment lines for each column we have
 in our migration answer file to append to the final
 statement.
 */
-func (schema *Schema) GenerateColumnBaseStatement() string {
+func (schema *Schema) ColumnStatement() string {
 
 	var statement string
 	for _, column := range schema.Structure.Columns {
@@ -100,11 +107,44 @@ func (schema *Schema) GenerateColumnBaseStatement() string {
 		statement = statement + sql + ", "
 
 	}
+
+	/*
+	Append keys if there is any present in the schema
+	migration file.
+	*/
+	is_keys, keys_stmnt := schema.KeysStatement()
+	if is_keys {
+		statement = statement + keys_stmnt
+	}
+
+	/*
 	return strings.TrimSuffix(statement, ", ")
 
 }
 
 
-func (schema *Schema) GenerateColumnKeyStatement() string {
-	return fmt.Sprintf("")
+
+func (schema *Schema) KeysStatement() (bool, string) {
+
+	/*
+	We have to check if there is keys present in the migration
+	file and apply them to the final query.
+	*/
+	if len(schema.Structure.Keys) > 0 {
+
+		var statement string
+		for _, column := range schema.Structure.Keys {
+			sql := fmt.Sprintf("%s KEY (`%s`)", column.Type, column.Field)
+			statement = statement + sql + ", "
+		}
+		return true, statement
+
+	} else {
+		return false, ""
+	}
+
+}
+
+
+
 }
