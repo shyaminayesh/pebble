@@ -160,7 +160,10 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			statement := &bytes.Buffer{}
 			err := schemalex.Strings(statement, result[1], parser.Statement())
 			if err != nil { log.Fatal(err) }
-			db.Exec(statement.String())
+
+			for _, stmnt := range strings.Split(statement.String(), ";") {
+				db.Exec(stmnt)
+			}
 
 		}
 
