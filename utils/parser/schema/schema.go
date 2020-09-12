@@ -143,8 +143,18 @@ func (schema *Schema) KeysStatement() (bool, string) {
 
 		var statement string
 		for _, column := range schema.Structure.Keys {
-			sql := fmt.Sprintf("%s KEY (`%s`)", column.Type, column.Field)
-			statement = statement + sql + ", "
+
+			// STRING
+			var sql string
+
+			// PRIMARY
+			if ( column.Type == "PRIMARY" ) {
+				sql = fmt.Sprintf("%s KEY (`%s`)", column.Type, column.Field)
+			} else {
+				sql = fmt.Sprintf("%s KEY `%s` (`%s`)", column.Type, column.Field, column.Field)
+			}
+
+			statement = statement + sql + ",\n "
 		}
 		return true, statement
 
@@ -166,7 +176,7 @@ func (schema *Schema) IndexesStatement() (bool, string) {
 
 		var statement string
 		for _, column := range schema.Structure.Indexes {
-			sql := fmt.Sprintf("INDEX %s (%s)", column.Field, column.Field)
+			sql := fmt.Sprintf("INDEX `%s` (`%s`)", column.Field, column.Field)
 			statement = statement + sql + ", "
 		}
 		return true, statement
