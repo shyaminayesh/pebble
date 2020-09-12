@@ -3,6 +3,7 @@ package schema
 import (
 	"fmt"
 	"log"
+	"bytes"
 	"strings"
 	"io/ioutil"
 	"database/sql"
@@ -11,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	parser "pebble/utils/parser/schema"
+	schemalex "github.com/schemalex/schemalex/diff"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -149,85 +151,16 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		*/
 		if count >= 1 {
 
-			/*
-				We can delete the columns that are not present in the
-				schema file safely before processing any other action.
-			*/
-			var columns []string
-			for _, column := range structure.Columns {
-				columns = append(columns, column.Name)
-			}
-			query := fmt.Sprintf("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME NOT IN ('%s')", schema, conf_connection.Get("name"), strings.Join(columns, "','"))
-			rows, err := db.Query(query)
+			parser := parser.Schema {}
+			parser.File("./" + conf_schema.Get("dir").(string) + "/" + schema + ".yml")
+
+			result := []string{"table", "ddl"}
+			db.QueryRow(fmt.Sprintf("SHOW CREATE TABLE %s", schema)).Scan(&result[0], &result[1])
+
+			statement := &bytes.Buffer{}
+			err := schemalex.Strings(statement, result[1], parser.Statement())
 			if err != nil { log.Fatal(err) }
-			defer rows.Close()
-
-			for rows.Next() {
-				var name string
-				err := rows.Scan(&name)
-				if err != nil { log.Fatal(err) }
-				query := fmt.Sprintf("ALTER TABLE %s DROP COLUMN %s", schema, name)
-				db.Exec(query)
-			}
-
-
-			/*
-				It's time to check each colum for changes and apply them
-				to the live database
-			*/
-			var last_column string
-			for _, column := range structure.Columns {
-
-				type (
-					Column struct {
-						Name		sql.NullString
-						Type		string
-						Nullable	string
-						Key			string
-						Charset		sql.NullString
-						Collation	sql.NullString
-						Extra		string
-					}
-				)
-
-				Result := Column {}
-				query := fmt.Sprintf("SELECT `COLUMN_NAME`, `COLUMN_TYPE`, `IS_NULLABLE`, `COLUMN_KEY`, `CHARACTER_SET_NAME`, `COLLATION_NAME`, `EXTRA` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE TABLE_NAME='%s' AND TABLE_SCHEMA='%s' AND COLUMN_NAME='%s'", schema, conf_connection.Get("name"), column.Name)
-				db.QueryRow(query).Scan(&Result.Name, &Result.Type, &Result.Nullable, &Result.Key, &Result.Charset, &Result.Collation, &Result.Extra)
-
-				// ADDITIONS
-				if Result.Name.Valid == false {
-
-					// BASE STATEMENT
-					stmnt := fmt.Sprintf("ALTER TABLE `%s`.`%s`  ADD `%s` %s", conf_connection.Get("name"), schema, column.Name, column.Type)
-
-					// COLLATION
-					if len(column.Collation) > 0 { stmnt = fmt.Sprintf("%s COLLATE %s", stmnt, column.Collation) }
-
-					// NULLABLE
-					if column.Nullable == true { stmnt = fmt.Sprintf("%s NULL", stmnt) }
-					if column.Nullable == false { stmnt = fmt.Sprintf("%s NOT NULL", stmnt) }
-
-					// COLUMN ORDER
-					stmnt = fmt.Sprintf("%s AFTER `%s`", stmnt, last_column)
-
-					// EXECUTE
-					db.Exec(stmnt)
-				}
-
-				// VALIDATE ( Type )
-				if column.Type != Result.Type { db.Exec(fmt.Sprintf("ALTER TABLE `%s`.`%s` MODIFY COLUMN `%s` %s", conf_connection.Get("name"), schema, column.Name, column.Type)) }
-
-				// VALIDATE ( Nullable )
-				if Result.Nullable == "YES" { if column.Nullable == false { db.Exec(fmt.Sprintf("ALTER TABLE `%s`.`%s` MODIFY COLUMN `%s` %s NOT NULL", conf_connection.Get("name"), schema, column.Name, column.Type)) } }
-				if Result.Nullable == "NO" { if column.Nullable == true { db.Exec(fmt.Sprintf("ALTER TABLE `%s`.`%s` MODIFY COLUMN `%s` %s NULL", conf_connection.Get("name"), schema, column.Name, column.Type)) } }
-
-				/*
-					Set last column we work on to help append columns with
-					ordering in the next cycle
-				*/
-				last_column = Result.Name.String
-
-			}
+			db.Exec(statement.String())
 
 		}
 
