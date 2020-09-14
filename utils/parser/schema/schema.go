@@ -109,19 +109,18 @@ func (schema *Schema) ColumnStatement() string {
 	}
 
 	/*
-	Append keys if there is any present in the schema
-	migration file.
+	Append the keys and the indexes statements into
+	the main schema migration statement.
 	*/
 	is_keys, keys_stmnt := schema.KeysStatement()
-	if is_keys {
+	is_indexes, indexes_stmnt := schema.IndexesStatement()
+
+	if is_keys && is_indexes {
 		statement = statement + keys_stmnt
+	} else if is_keys {
+		statement = statement + strings.TrimSuffix(keys_stmnt, ",")
 	}
 
-	/*
-	Append indexes if there is any present in the schema
-	migration file.
-	*/
-	is_indexes, indexes_stmnt := schema.IndexesStatement()
 	if is_indexes {
 		statement = statement + indexes_stmnt
 	}
@@ -149,14 +148,14 @@ func (schema *Schema) KeysStatement() (bool, string) {
 
 			// PRIMARY
 			if ( column.Type == "PRIMARY" ) {
-				sql = fmt.Sprintf("%s KEY (`%s`)", column.Type, column.Field)
+				sql = fmt.Sprintf("  %s KEY (`%s`)", column.Type, column.Field)
 			} else {
-				sql = fmt.Sprintf("%s KEY `%s` (`%s`)", column.Type, column.Field, column.Field)
+				sql = fmt.Sprintf("  %s KEY `%s` (`%s`)", column.Type, column.Field, column.Field)
 			}
 
-			statement = statement + sql + ",\n "
+			statement = statement + sql + ",\n"
 		}
-		return true, statement
+		return true, strings.TrimSuffix(statement, "\n")
 
 	} else {
 		return false, ""
