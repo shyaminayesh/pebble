@@ -23,7 +23,6 @@ func Dispatch() {
 	Command.AddCommand(Version_Command)
 
 	Command.AddCommand(Schema_Command)
-	Schema_Command.AddCommand(schema.Schema_Status_Command)
 	Schema_Command.AddCommand(schema.Schema_Migrate_Command)
 
 	if err := Command.Execute(); err != nil {
