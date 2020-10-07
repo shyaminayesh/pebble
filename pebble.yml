@@ -3,6 +3,7 @@ connection:
   port: 3306
   name: test
   user: user
+  database: test
   password: password
   driver: mysql
   dialect: mysql
