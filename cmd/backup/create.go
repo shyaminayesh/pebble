@@ -12,11 +12,11 @@ import (
 var Create_Command = &cobra.Command{
 	Use: "create",
 	Short: "Create a new backup of the database",
-	Run: run_backup,
+	Run: run_create,
 }
 
 
-func run_backup(cmd *cobra.Command, args []string) {
+func run_create(cmd *cobra.Command, args []string) {
 
 	/**
 	* We have to load main pebble configuration to get
