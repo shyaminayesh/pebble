@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"pebble/cmd/schema"
+	"pebble/cmd/database"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,9 @@ func Dispatch() {
 
 	Command.AddCommand(Schema_Command)
 	Schema_Command.AddCommand(schema.Schema_Migrate_Command)
+
+	Command.AddCommand(Database_Command)
+	Database_Command.AddCommand(database.Database_Backup_Command)
 
 	if err := Command.Execute(); err != nil {
 		fmt.Println(err)
