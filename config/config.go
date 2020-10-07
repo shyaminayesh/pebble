@@ -52,7 +52,6 @@ func Get() Configuration {
 	*/
 	configuration := Configuration {}
 	yaml.Unmarshal(buffer, &configuration)
-	fmt.Println( configuration )
 	return configuration
 
 }
