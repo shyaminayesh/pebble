@@ -5,9 +5,14 @@ connection:
   user: user
   password: password
   driver: mysql
+  dialect: mysql
 
 schema:
   dir: database/schema
+  directory: database/schema
+
+backup:
+  directory: database/backup
 
 seed:
   dir: database/seed
