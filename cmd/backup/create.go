@@ -1,4 +1,4 @@
-package database
+package backup
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Database_Backup_Command = &cobra.Command{
-	Use: "backup",
-	Short: "Backup database",
+var Create_Command = &cobra.Command{
+	Use: "create",
+	Short: "Create a new backup of the database",
 	Run: run_backup,
 }
 
