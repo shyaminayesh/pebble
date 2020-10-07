@@ -14,4 +14,4 @@ build:
 	go build ./pebble.go
 
 run:
-	go run ./pebble.go database backup
+	go run ./pebble.go backup create
