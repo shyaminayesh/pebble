@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"bytes"
+	"strings"
 	"database/sql"
 	"text/template"
 )
@@ -26,6 +27,12 @@ type (
 	Table struct {
 		Name		string
 		SQL			string
+		Records		[]Record
+	}
+
+	Record struct {
+		Table		string
+		Values		string
 	}
 )
 
@@ -55,12 +62,13 @@ SET time_zone = "+00:00";
 --
 
 DROP TABLE IF EXISTS {{ .Name }};
-{{ .SQL }}
+{{ .SQL }};
 
+{{ if .Records }}
 --
 -- Dumping data for table {{ .Name }}
---
-
+--{{ range .Records }}
+INSERT INTO {{ .Table }} VALUES {{ .Values }};{{ end }}{{ end }}
 
 {{ end }}
 `
@@ -73,7 +81,7 @@ func Construct(db *sql.DB) (*Dumper, error) {
 }
 
 
-func (dumper *Dumper) Export() (string) {
+func (dumper *Dumper) Export() (string, error) {
 
 	/**
 	* Get information about the server instance to inject
@@ -117,11 +125,48 @@ func (dumper *Dumper) Export() (string) {
 		result := []string{"table", "ddl"}
 		dumper.db.QueryRow(fmt.Sprintf("SHOW CREATE TABLE %s", table)).Scan(&result[0], &result[1])
 
+		// data
+		rows, err := dumper.db.Query(fmt.Sprintf("SELECT * FROM %s", table))
+		if err != nil { log.Fatal(err) }
+		defer rows.Close()
+
+		columns, err := rows.Columns()
+		if err != nil { log.Fatal(err) }
+
+		records := []Record {}
+		for rows.Next() {
+
+			data := make([]*sql.NullString, len(columns))
+			ptrs := make([]interface{}, len(columns))
+			for i, _ := range data {
+				ptrs[i] = &data[i]
+			}
+
+			if err := rows.Scan(ptrs...); err != nil {
+				return "", err
+			}
+
+			data_strings := make([]string, len(columns))
+			for key, value := range data {
+				if value != nil && value.Valid {
+					data_strings[key] = "'" + value.String + "'"
+				} else {
+					data_strings[key] = "null"
+				}
+			}
+
+			records = append(records, Record {
+				Table: table,
+				Values: fmt.Sprintf("(%s)", strings.Join(data_strings, ",")),
+			})
+
+		}
+
 		tables = append(tables, Table {
 			Name: table,
 			SQL: result[1],
+			Records: records,
 		})
-		// fmt.Println( result[1] )
 	}
 
 
@@ -140,5 +185,5 @@ func (dumper *Dumper) Export() (string) {
 	})
 
 
-	return buffer.String()
+	return buffer.String(), nil
 }
