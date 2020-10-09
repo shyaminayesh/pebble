@@ -1,0 +1,22 @@
+name: makepkg
+
+on:
+  push:
+    branches:
+      - dev
+      - prod
+  
+  release:
+    types:
+      - created
+
+jobs:
+  makepkg:
+    name: makepkg
+    runs-on: ubuntu-latest
+    steps:
+      - name: ArchLinux Package
+        uses: 2m/arch-pkgbuild-builder@v1
+        with:
+          target: "srcinfo"
+          pkgname: "pebble"
