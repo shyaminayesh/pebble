@@ -15,8 +15,12 @@ jobs:
     name: makepkg
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        run: cp .ci/aur/pebble pebble -r
+
       - name: ArchLinux Package
         uses: 2m/arch-pkgbuild-builder@v1.16
         with:
           target: "srcinfo"
-          pkgname: "build/pebble"
+          pkgname: "pebble"
