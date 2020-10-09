@@ -14,4 +14,4 @@ build:
 	go build ./pebble.go
 
 run:
-	go run ./pebble.go backup create
+	go run ./pebble.go schema migrate

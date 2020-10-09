@@ -9,7 +9,6 @@ connection:
   dialect: mysql
 
 schema:
-  dir: database/schema
   directory: database/schema
 
 backup:

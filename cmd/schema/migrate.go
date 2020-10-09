@@ -24,20 +24,19 @@ var Schema_Migrate_Command = &cobra.Command{
 
 func schema_migrate(cmd *cobra.Command, args []string) {
 
-	/*
-		We need to initialize configuration instance to
-		query main configuration file for future usage
+	/**
+	* We have to load main pebble configuration to get
+	* essential configuration information to continue
+	* the process.
 	*/
-	var conf = config.Config()
-	conf_connection := conf.Sub("connection")
-	conf_schema := conf.Sub("schema")
+	Config := config.Get()
 
-	/*
-		We need to establish database connection to
-		perform queries on the database
+	/**
+	* Establish connection to the database using the
+	* pebble configuration.
 	*/
-	dialect := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s", conf_connection.Get("user"), conf_connection.Get("password"), conf_connection.Get("host"), conf_connection.Get("port"), conf_connection.Get("name"))
-	db, err := sql.Open(conf_connection.Get("driver").(string), dialect)
+	dialect := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s", Config.Connection.User, Config.Connection.Password, Config.Connection.Host, Config.Connection.Port, Config.Connection.Database)
+	db, err := sql.Open(Config.Connection.Dialect, dialect)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,10 +48,8 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		file to operate.
 	*/
 	var schemas []string
-	files, err := ioutil.ReadDir("./" + conf_schema.Get("dir").(string))
-	if err != nil {
-		log.Fatal(err)
-	}
+	files, err := ioutil.ReadDir("./" + Config.Schema.Directory)
+	if err != nil { log.Fatal(err) }
 
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".yml") {
@@ -65,7 +62,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		set first to clear out the unwanted tables from
 		the database.
 	*/
-	query := fmt.Sprintf("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME NOT IN ('%s')", conf_connection.Get("name"), strings.Join(schemas, "','"))
+	query := fmt.Sprintf("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME NOT IN ('%s')", Config.Connection.Database, strings.Join(schemas, "','"))
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Fatal(err)
@@ -116,11 +113,9 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		v := viper.New()
 		v.SetConfigName(schema)
 		v.SetConfigType("yml")
-		v.AddConfigPath("./" + conf_schema.Get("dir").(string))
+		v.AddConfigPath("./" + Config.Schema.Directory)
 		err := v.ReadInConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
+		if err != nil { log.Fatal(err) }
 		var structure Structure
 		v.Unmarshal(&structure)
 
@@ -129,7 +124,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			the table if it's not exists first.
 		*/
 		var count int
-		query := fmt.Sprintf("SELECT CAST(COUNT(TABLE_NAME) AS UNSIGNED) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='%s'", conf_connection.Get("name"), schema)
+		query := fmt.Sprintf("SELECT CAST(COUNT(TABLE_NAME) AS UNSIGNED) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='%s'", Config.Connection.Database, schema)
 		db.QueryRow(query).Scan(&count)
 
 
@@ -140,7 +135,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		*/
 		if count == 0 {
 			parser := parser.Schema {}
-			parser.File("./" + conf_schema.Get("dir").(string) + "/" + schema + ".yml")
+			parser.File("./" + Config.Schema.Directory + "/" + schema + ".yml")
 			db.Exec(parser.Statement())
 		}
 
@@ -152,7 +147,7 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 		if count >= 1 {
 
 			parser := parser.Schema {}
-			parser.File("./" + conf_schema.Get("dir").(string) + "/" + schema + ".yml")
+			parser.File("./" + Config.Schema.Directory + "/" + schema + ".yml")
 
 			result := []string{"table", "ddl"}
 			db.QueryRow(fmt.Sprintf("SHOW CREATE TABLE %s", schema)).Scan(&result[0], &result[1])
