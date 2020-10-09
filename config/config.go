@@ -30,7 +30,12 @@ type (
 	}
 
 	Backup struct {
+		File		File		`yaml:"file"`
 		Directory	string		`yaml:"directory"`
+	}
+
+	File struct {
+		Timestamp	string		`yaml:"timestamp"`
 	}
 )
 
