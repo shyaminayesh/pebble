@@ -14,6 +14,8 @@ schema:
 
 backup:
   directory: database/backup
+  file:
+    timestamp: 20060201-150405
 
 seed:
   dir: database/seed
