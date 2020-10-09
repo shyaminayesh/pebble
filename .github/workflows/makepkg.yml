@@ -5,7 +5,6 @@ on:
     branches:
       - dev
       - prod
-  
   release:
     types:
       - created
