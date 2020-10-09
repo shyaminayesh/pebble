@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ArchLinux Package
-        uses: 2m/arch-pkgbuild-builder@v1
+        uses: 2m/arch-pkgbuild-builder@v1.16
         with:
           target: "srcinfo"
           pkgname: "pebble"
