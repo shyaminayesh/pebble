@@ -9,7 +9,7 @@ install:
 uninstall:
 	sudo rm -rf /usr/bin/pebble
 
-compile:
+build:
 	rm -rf pebble
 	go build ./pebble.go
 
