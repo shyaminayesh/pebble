@@ -1,8 +1,10 @@
 package backup
 
 import (
+	"os"
 	"fmt"
 	"log"
+	"time"
 	"database/sql"
 	"pebble/config"
 	"pebble/utils/dumper"
@@ -43,6 +45,20 @@ func run_create(cmd *cobra.Command, args []string) {
 	dumper, err := dumper.Construct(db)
 	if err != nil { log.Fatal(err) }
 
-	fmt.Println( dumper.Export() )
+	dump, err := dumper.Export()
+	if err != nil { log.Fatal(err) }
+
+	/**
+	* We have to create a file inside the backup directory
+	* and store the dump text into that file to complete
+	* the database backup.
+	*/
+	timestamp := time.Now().Format(fmt.Sprintf(Config.Backup.File.Timestamp))
+
+	file, err := os.Create(fmt.Sprintf("./%s/%s.sql", Config.Backup.Directory, timestamp))
+	if err != nil { log.Fatal(err) }
+	defer file.Close()
+
+	file.WriteString(fmt.Sprintf("%s\n", dump))
 
 }
