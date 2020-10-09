@@ -4,7 +4,6 @@ connection:
   user: user
   database: test
   password: password
-  driver: mysql
   dialect: mysql
 
 schema:
