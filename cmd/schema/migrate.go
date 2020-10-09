@@ -7,13 +7,12 @@ import (
 	"strings"
 	"io/ioutil"
 	"database/sql"
-	"pebble/utils/log"
 	"pebble/config"
+	"pebble/utils/log"
+	"gopkg.in/yaml.v3"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	parser "pebble/utils/parser/schema"
 	schemalex "github.com/schemalex/schemalex/diff"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var Schema_Migrate_Command = &cobra.Command{
@@ -110,14 +109,16 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			}
 		)
 
-		v := viper.New()
-		v.SetConfigName(schema)
-		v.SetConfigType("yml")
-		v.AddConfigPath("./" + Config.Schema.Directory)
-		err := v.ReadInConfig()
+		/**
+		* We need to read the file and append the configuration
+		* properties to the Configuration struct to continue
+		* the configuration file parse
+		*/
+		structure := Structure {}
+		buffer, err := ioutil.ReadFile(fmt.Sprintf("./%s/%s.yml", Config.Schema.Directory, schema))
 		if err != nil { log.Fatal(err) }
-		var structure Structure
-		v.Unmarshal(&structure)
+		yaml.Unmarshal(buffer, &structure)
+
 
 		/*
 			Check if the table is exists or not and then create
