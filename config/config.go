@@ -1,11 +1,9 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v3"
-	"github.com/spf13/viper"
 )
 
 
@@ -59,19 +57,4 @@ func Get() Configuration {
 	yaml.Unmarshal(buffer, &configuration)
 	return configuration
 
-}
-
-
-func Config() *viper.Viper {
-
-	var v = viper.New()
-	v.SetConfigName("pebble")
-	v.SetConfigType("yml")
-	v.AddConfigPath(".")
-	err := v.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	}
-
-	return v
 }
