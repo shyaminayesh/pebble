@@ -15,8 +15,8 @@ jobs:
     name: makepkg
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Checkout
-        uses: actions/checkout@v2
         run: cp .ci/aur/pebble pebble -r
 
       - name: ArchLinux Package
