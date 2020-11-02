@@ -9,7 +9,6 @@ import (
 	"database/sql"
 	"pebble/config"
 	"pebble/utils/log"
-	"gopkg.in/yaml.v3"
 	"github.com/spf13/cobra"
 	parser "pebble/utils/parser/schema"
 	schemalex "github.com/schemalex/schemalex/diff"
@@ -89,50 +88,19 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 	for _, schema := range schemas {
 		fmt.Println("[TABLE]: " + schema)
 
-		type (
-			Column struct {
-				Name		string		`mapstructure:"name"`
-				Type		string		`mapstructure:"type"`
-				Nullable	bool		`mapstructure:"nullable"`
-				Primary		bool		`mapstructure:"primary"`
-				Increment	bool		`mapstructure:"increment"`
-				Collation	string		`mapstructure:"collation"`
-			}
-			Table struct {
-				Engine		string		`mapstructure:"engine"`
-				Charset		string		`mapstructure:"charset"`
-				Collation	string		`mapstructure:"collation"`
-			}
-			Structure struct {
-				Table		Table		`mapstructure:"table"`
-				Columns		[]Column	`mapstructure:"columns"`
-			}
-		)
-
 		/**
-		* We need to read the file and append the configuration
-		* properties to the Configuration struct to continue
-		* the configuration file parse
-		*/
-		structure := Structure {}
-		buffer, err := ioutil.ReadFile(fmt.Sprintf("./%s/%s.yml", Config.Schema.Directory, schema))
-		if err != nil { log.Fatal(err) }
-		yaml.Unmarshal(buffer, &structure)
-
-
-		/*
-			Check if the table is exists or not and then create
-			the table if it's not exists first.
+		* Check if the table is exists or not and then create
+		* the table if it's not exists first.
 		*/
 		var count int
 		query := fmt.Sprintf("SELECT CAST(COUNT(TABLE_NAME) AS UNSIGNED) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s' AND TABLE_NAME='%s'", Config.Connection.Database, schema)
 		db.QueryRow(query).Scan(&count)
 
 
-		/*
-			Here we handle the table not exists state by using the
-			table count from the last sql query and then we create new
-			table in the database according to the migration file.
+		/**
+		* Here we handle the table not exists state by using the
+		* table count from the last sql query and then we create new
+		* table in the database according to the migration file.
 		*/
 		if count == 0 {
 			parser := parser.Schema {}
@@ -140,10 +108,10 @@ func schema_migrate(cmd *cobra.Command, args []string) {
 			db.Exec(parser.Statement())
 		}
 
-		/*
-			Depending on the recent sql query table count details we can
-			decide to modify exsisting table schema according to the
-			changes in the migration file.
+		/**
+		* Depending on the recent sql query table count details we can
+		* decide to modify exsisting table schema according to the
+		* changes in the migration file.
 		*/
 		if count >= 1 {
 
